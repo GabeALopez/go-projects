@@ -10,6 +10,7 @@ import (
 // TODO: add logic to enter into application. Like a login
 func main() {
 	fmt.Println("Welcome to the Anime Update Email List!")
+	fmt.Println("Get updated when your favorite anime is being released within an hour.")
 
 	anime := make(map[string]int)
 	reader := bufio.NewReader(os.Stdin)
