@@ -5,54 +5,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"encoding/csv"
 )
 
-// TODO: add logic to enter into application. Like a login
-func main() {
-	fmt.Println("Welcome to the Anime Update Email List!")
-	fmt.Println("Get updated when your favorite anime is being released within an hour.")
+//TODO: check if there is data in file
+func readAnime(data [][]string) map[string]int{
+	animeMap := make(map[string]int)
 
-	anime := make(map[string]int)
-	reader := bufio.NewReader(os.Stdin)
-
-	for {
-		displayMenu()
-		choice, _ := reader.ReadString('\n')
-		choice = strings.TrimSpace(choice)
-
-		switch choice {
-		case "1":
-			addAnime(anime)
-		case "2":
-			viewAnime(anime)
-		case "3":
-			deleteAnime(anime)
-		case "4":
-			fmt.Println("Exiting the application.")
-			return
-		default:
-			fmt.Println("Invalid choice. Please try again.")
-		}
-
-	}
-
-	//TODO: add logic under here to loop
-	/*anime := map[string]int{
-		"Demon Slayer":          166240,
-		"Jobless Reincarnation": 166873,
-		"Spice and Wolf":        145728,
-	}
-
-	url := "http://google.com"
-
-	data, err := scrapper.ScrapeWebsite(url)
-
-	if err != nil {
-		log.Fatalf("Error scraping website: %w", err)
-	}
-
-	fmt.Println(data)
-	*/
 }
 
 func displayMenu() {
@@ -98,3 +57,68 @@ func deleteAnime(animeMap map[string]int) {
 	return
 
 }
+
+// TODO: add logic to enter into application. Like a login
+func main() {
+	fmt.Println("Welcome to the Anime Update Email List!")
+	fmt.Println("Get updated when your favorite anime is being released within an hour.")
+	
+	f, err := os.Open("data.csv")
+	if err != nil {
+		log.Fetal(err)
+	}
+
+	defer f.close()
+
+	csvReader := csv.NewReader(f)
+	data, err := csvReader.ReadAll()
+	if err != nil {
+		log.Fetal(err)
+	}
+
+	animeData = := 
+
+	anime := make(map[string]int)
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		displayMenu()
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+
+		switch choice {
+		case "1":
+			addAnime(anime)
+		case "2":
+			viewAnime(anime)
+		case "3":
+			deleteAnime(anime)
+		case "4":
+			fmt.Println("Exiting the application.")
+			return
+		default:
+			fmt.Println("Invalid choice. Please try again.")
+		}
+
+	}
+
+	//TODO: add logic under here to loop
+	/*anime := map[string]int{
+		"Demon Slayer":          166240,
+		"Jobless Reincarnation": 166873,
+		"Spice and Wolf":        145728,
+	}
+
+	url := "http://google.com"
+
+	data, err := scrapper.ScrapeWebsite(url)
+
+	if err != nil {
+		log.Fatalf("Error scraping website: %w", err)
+	}
+
+	fmt.Println(data)
+	*/
+}
+
+
