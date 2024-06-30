@@ -5,12 +5,129 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"encoding/csv"
+	"time"
 )
 
-//TODO: check if there is data in file
-func readAnime(data [][]string) map[string]int{
+// TODO: Create general request
+func generalRequest(animeTitles []string) []map[string]int {
+
+}
+
+// TODO: Create request processing function
+func processAddAnimeRequest(animeTitles []string) map[string]int {
+
+	// This does not matter as title takes all in graphql
+	// R̶e̶a̶d̶ ̶f̶o̶r̶ ̶J̶a̶p̶a̶n̶e̶s̶e̶ ̶a̶n̶d̶ ̶e̶n̶g̶l̶i̶s̶h̶ ̶t̶i̶t̶l̶e̶s̶
+	reader := bufio.NewReader(os.Stdin)
+
+	/*
+
+		# Summary so far:
+
+		- Worked on processing the anime that come in as slice of maps
+			1. Plan to work on editing each individual map in slice
+			2. Return the map so it can be added to file
+			3. Create the API request to site
+
+	*/
+	for {
+		// 1. Do API request and grab the titles and IDs
+		animeSliceFromAPI := generalRequest(animeTitles)
+		// 2. Confirm data to user
+		for _, animeMap := range animeSliceFromAPI {
+			for key := range animeMap {
+				fmt.Println("%s", key)
+			}
+
+		}
+		//TODO: Allow to redo a single anime title
+		fmt.Println("Are these the anime you are looking to add? (y/n): ")
+		//Grab input from user
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+
+		switch choice {
+		case "y":
+			break
+		case "n":
+			continue
+		default:
+			fmt.Println("Not a valid choice")
+		}
+
+	}
+
+	// 3. Return the map with title and ID
+
+}
+
+func readAnime() map[string]int {
+
+	for {
+		file, err := os.Open("cmd/anime.txt")
+		if err != nil {
+			//TODO: log these errors in a file
+			//TODO: After 5 consecutive fails email me
+			fmt.Println("Error opening file:", err)
+			fmt.Println("Retrying in 1 minute...")
+			time.Sleep(time.Minute)
+			continue
+		}
+
+		fileInfo, err := file.Stat()
+		if err != nil {
+			//TODO: log these errors in a file
+			fmt.Println("Error getting file information:", err)
+			fmt.Println("Retrying in 5 seconds")
+			time.Sleep(time.Second * 5)
+			file.Close()
+			continue
+		}
+
+		if fileInfo.Size() > 0 {
+			fmt.Println("File has anime :)")
+		} else {
+			fmt.Println("File does not have anime :(")
+		}
+
+		file.Close()
+		break
+	}
+
 	animeMap := make(map[string]int)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		parts := strings.Split(line, ":")
+		if len(parts) == 2 {
+			title := parts[0]
+			id := parts[1]
+
+			var idInt int
+
+			_, err := fmt.Sscanf(id, "%d", &idInt)
+			if err != nil {
+				//TODO: log these errors in a file
+				fmt.Printf("Error converting id '%s' to integer: %v\n", id, err)
+				fmt.Printf("Skipping %s:%s", title, id)
+				continue
+			}
+			animeMap[title] = idInt
+		} else {
+			//TODO: log these errors in a file
+			fmt.Printf("Invalid line format: '%s'\n", line)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		//TODO: log these errors in a file
+		fmt.Println("Error scanning file:", err)
+		return nil
+	}
+
+	return animeMap
 
 }
 
@@ -35,10 +152,11 @@ func addAnime(animeMap map[string]int) {
 }
 
 func viewAnime(animeMap map[string]int) {
-	fmt.Println("\nYour Tasks:")
+	fmt.Println("\nHere are your current anime:")
 	for title := range animeMap {
 		fmt.Printf("Title: %s\n", title)
 	}
+
 }
 
 func deleteAnime(animeMap map[string]int) {
@@ -62,23 +180,19 @@ func deleteAnime(animeMap map[string]int) {
 func main() {
 	fmt.Println("Welcome to the Anime Update Email List!")
 	fmt.Println("Get updated when your favorite anime is being released within an hour.")
-	
-	f, err := os.Open("data.csv")
-	if err != nil {
-		log.Fetal(err)
+
+	var animeMap map[string]int
+
+	for {
+		animeMap := readAnime()
+		if animeMap == nil {
+			fmt.Println("Retrying in a minute...")
+			time.Sleep(time.Minute)
+			continue
+		}
+		break
 	}
 
-	defer f.close()
-
-	csvReader := csv.NewReader(f)
-	data, err := csvReader.ReadAll()
-	if err != nil {
-		log.Fetal(err)
-	}
-
-	animeData = := 
-
-	anime := make(map[string]int)
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -88,11 +202,11 @@ func main() {
 
 		switch choice {
 		case "1":
-			addAnime(anime)
+			addAnime(animeMap)
 		case "2":
-			viewAnime(anime)
+			viewAnime(animeMap)
 		case "3":
-			deleteAnime(anime)
+			deleteAnime(animeMap)
 		case "4":
 			fmt.Println("Exiting the application.")
 			return
@@ -120,5 +234,3 @@ func main() {
 	fmt.Println(data)
 	*/
 }
-
-
