@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -18,26 +19,33 @@ func processAddAnimeRequest(animeTitles []string) map[string]int {
 
 	// This does not matter as title takes all in graphql
 	// R̶e̶a̶d̶ ̶f̶o̶r̶ ̶J̶a̶p̶a̶n̶e̶s̶e̶ ̶a̶n̶d̶ ̶e̶n̶g̶l̶i̶s̶h̶ ̶t̶i̶t̶l̶e̶s̶
-	reader := bufio.NewReader(os.Stdin)
 
 	/*
 
 		# Summary so far:
 
 		- Worked on processing the anime that come in as slice of maps
-			1. Plan to work on editing each individual map in slice
-			2. Return the map so it can be added to file
-			3. Create the API request to site
+			1. [ ] Plan to work on editing each individual map in slice
+			2. [ ] Return the map so it can be added to file
+			3. [ ] Create the API request to site
 
 	*/
 	for {
+		fmt.Print("Enter anime titles seperated by a comma (ex: <title>, <title>): ")
+		reader := bufio.NewReader(os.Stdin)
+
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		userTitles := strings.Split(line, ",")
+
 		// 1. Do API request and grab the titles and IDs
-		animeSliceFromAPI := generalRequest(animeTitles)
+		animeMapFromAPI := generalRequest(userTitles)
 		// 2. Confirm data to user
-		for _, animeMap := range animeSliceFromAPI {
-			for key := range animeMap {
-				fmt.Println("%s", key)
-			}
+		for title, id := range animeMapFromAPI {
+			fmt.Println("%s : %s", title, id)
 
 		}
 		//TODO: Allow to redo a single anime title
@@ -61,7 +69,7 @@ func processAddAnimeRequest(animeTitles []string) map[string]int {
 
 }
 
-func readAnime() map[string]int {
+func readAnimeFile() map[string]int {
 
 	for {
 		file, err := os.Open("cmd/anime.txt")
@@ -141,12 +149,14 @@ func displayMenu() {
 }
 
 func addAnime(animeMap map[string]int) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter anime title: ")
-	title, _ := reader.ReadString('\n')
-	title = strings.TrimSpace(title)
-	//TODO: Add logic to input title and do call to get id
-	animeMap[title] = id
+
+	var animeTitles []string
+
+	for titles := range animeMap {
+		animeTitles = append(animeTitles, titles)
+	}
+
+	processAddAnimeRequest(animeTitles)
 	//TODO: add logic to add to a file
 	fmt.Println("Anime added to file!")
 }
@@ -184,7 +194,7 @@ func main() {
 	var animeMap map[string]int
 
 	for {
-		animeMap := readAnime()
+		animeMap := readAnimeFile()
 		if animeMap == nil {
 			fmt.Println("Retrying in a minute...")
 			time.Sleep(time.Minute)
